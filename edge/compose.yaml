@@ -1,0 +1,92 @@
+services:
+  init-bootnode-secrets:
+    extends:
+      file: ./node/compose.yaml
+      service: init
+    volumes:
+      - ./validator-bootnode:/app
+
+  init-alice-secrets:
+    extends:
+      file: ./node/compose.yaml
+      service: init
+    volumes:
+      - ./validator-alice:/app
+
+  init-bob-secrets:
+    extends:
+      file: ./node/compose.yaml
+      service: init
+    volumes:
+      - ./validator-bob:/app
+
+  init-charlie-secrets:
+    extends:
+      file: ./node/compose.yaml
+      service: init
+    volumes:
+      - ./validator-charlie:/app
+
+  init-bootnode-genesis:
+    extends:
+      file: ./node/compose.yaml
+      service: edge
+    volumes:
+      - ./:/app
+    command: ./genesis-init.sh
+    depends_on:
+      init-bootnode-secrets:
+        condition: service_completed_successfully
+      init-alice-secrets:
+        condition: service_completed_successfully
+      init-bob-secrets:
+        condition: service_completed_successfully
+      init-charlie-secrets:
+        condition: service_completed_successfully
+
+  bootnode:
+    extends:
+      file: ./node/compose.yaml
+      service: server
+    ports:
+      - 8545:8545
+      - 1478:1478
+    volumes:
+      - ./genesis.json:/app/genesis.json
+      - ./validator-bootnode:/app
+    depends_on:
+      init-bootnode-genesis:
+        condition: service_completed_successfully
+
+  alice:
+    extends:
+      file: ./node/compose.yaml
+      service: server
+    volumes:
+      - ./genesis.json:/app/genesis.json
+      - ./validator-alice:/app
+    depends_on:
+      init-bootnode-genesis:
+        condition: service_completed_successfully
+
+  bob:
+    extends:
+      file: ./node/compose.yaml
+      service: server
+    volumes:
+      - ./genesis.json:/app/genesis.json
+      - ./validator-bob:/app
+    depends_on:
+      init-bootnode-genesis:
+        condition: service_completed_successfully
+
+  charlie:
+    extends:
+      file: ./node/compose.yaml
+      service: server
+    volumes:
+      - ./genesis.json:/app/genesis.json
+      - ./validator-charlie:/app
+    depends_on:
+      init-bootnode-genesis:
+        condition: service_completed_successfully

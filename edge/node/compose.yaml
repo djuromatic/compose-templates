@@ -1,0 +1,23 @@
+services:
+  edge:
+    build:
+      context: .
+
+  init:
+    build:
+      context: . 
+    command: bash -c "polygon-edge secrets init --data-dir /app --json > /app/secrets-output.json" 
+
+  server:
+    build:
+      context: .
+    restart: always
+    command: [
+      "polygon-edge",
+      "server",
+      "--data-dir", "/app/",
+      "--chain", "/app/genesis.json",
+      "--grpc-address", "0.0.0.0:9632",
+      "--libp2p", "0.0.0.0:1478",
+      "--jsonrpc", "0.0.0.0:8545",
+      "--seal"]
